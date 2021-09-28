@@ -1,5 +1,7 @@
 # Single page application to show population line chart of Japanese provinces
 
+- Author : Pham Tuan Dung
+- Finish date : 28/09/2021 
 - Demo Deploy on Nelify : https://yumemi-testcode-dungbk10t.netlify.app
 
 ## API :
@@ -31,9 +33,8 @@
 
 ## Some captures:
 
-![alt](https://github.com/dungbk10t/test_yumemi/blob/master/Captures/captures_0.PNG?raw=true)
+![alt](https://github.com/dungbk10t/test_yumemi/blob/master/Captures/captures_1.PNG?raw=true)
 <br />*This is single page application deploy on Nelify*<br />
 
-![alt](https://github.com/dungbk10t/test_yumemi/blob/master/Captures/captures_1.PNG?raw=true)
-
+![alt](https://github.com/dungbk10t/test_yumemi/blob/master/Captures/captures_0.PNG?raw=true)
 <br />*Get API here*<br />
