@@ -37,14 +37,25 @@ const PREFIX = "https://opendata.resas-portal.go.jp/api/v1";
 
 export default function App() {
   // Variable storage list of provinces
-  const [prefs, setPrefs] = useState([]);
+  const [prefs, setPrefs] = useState(() => {
+    const local_prefs = JSON.parse(localStorage.getItem("prefs"));
+    return local_prefs || []; 
+  });
   // Data displayed on the chart
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(() => {
+    const local_data = JSON.parse(localStorage.getItem("data"));
+    return local_data || [];
+  });
   // The data which getted from the API
-  const [saved, setSaved] = useState([]);
+  const [saved, setSaved] = useState(() => {
+    const local_saved = JSON.parse(localStorage.getItem("saved"));
+    return local_saved || [];
+  });
   // Storage checkbox which is checked
-  const [checked, setChecked] = useState([]);
-
+  const [checked, setChecked] = useState(() => {
+    const local_checked = JSON.parse(localStorage.getItem("checked"));
+    return local_checked || [];
+  });
   // Call API to get list of provinces
   useEffect(() => {
     const fetchData = () => {
@@ -71,14 +82,18 @@ export default function App() {
           console.log(e);
         });
     };
-    fetchData();
+    if (prefs.length === 0) fetchData();
+    localStorage.setItem("prefs", JSON.stringify(prefs));
+    localStorage.setItem("data", JSON.stringify(data));
+    localStorage.setItem("saved", JSON.stringify(saved));
+    localStorage.setItem("checked", JSON.stringify(checked));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [prefs, data, saved, checked]);
 
   /**
    * @Fuction : Fuction to handle event when click to checkbox
    * @Explain :
-   *     + If that checkbox is not checked 
+   *     + If that checkbox is not checked
    *       and that province data has not been saved
    *          => Call API to get population data of that province
    *     + Else, only change state of checkbox
@@ -90,8 +105,7 @@ export default function App() {
     if (!checked[position - 1] && !saved[position - 1]) {
       axios
         .get(
-          `${PREFIX}/population/composition/perYear?cityCode=-&prefCode=${prefs[position - 1].prefCode
-          }`,
+          `${PREFIX}/population/composition/perYear?cityCode=-&prefCode=${prefs[position - 1].prefCode}`,
           {
             headers: {
               "X-API-KEY": API_KEY,
@@ -126,12 +140,12 @@ export default function App() {
     );
     setChecked(updatedCheckedState);
   };
-  // Use useStae to set opacity line 
+  // Use useStae to set opacity line
   const [opacity, setOpacity] = useState({});
   /**
    * @Function : Handle event
    *    when the mouse pointer to the province name, blur that line.
-   * @param {*} o 
+   * @param {*} o
    * @CreatedBy : Pham Tuan Dung - 28/09/2021
    * @ModifiedBy : Pham Tuan Dung - 28/09/2021
    */
@@ -141,13 +155,13 @@ export default function App() {
   };
   /**
    * @Function : Handle event
-   *    when removing the mouse pointer to the province name, 
+   *    when removing the mouse pointer to the province name,
    *    removes the line blur effect.
-   * @param {*} o 
+   * @param {*} o
    * @CreatedBy : Pham Tuan Dung - 28/09/2021
    * @ModifiedBy : Pham Tuan Dung - 28/09/2021
    */
- 
+
   const handleMouseLeave = (o) => {
     const { dataKey } = o;
     setOpacity({ ...opacity, [dataKey]: 1 });
