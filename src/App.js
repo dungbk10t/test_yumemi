@@ -4,9 +4,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import axios from 'axios';
 
 // Returns a random number between min (inclusive) and max (exclusive)
-function getRandomArbitrary(min, max) {
-  return parseInt(Math.random() * (max - min) + min);
-}
+// function getRandomArbitrary(min, max) {
+//   return parseInt(Math.random() * (max - min) + min);
+// }
 
 var dynamicColors = function() {
   var r = Math.floor(Math.random() * 255);
@@ -15,7 +15,7 @@ var dynamicColors = function() {
   return "rgb(" + r + ", " + g + ", " + b + ")";
 };
 
-const years = [0, 1980, 1990, 2000, 2010, 2020];
+const years = [1970, 1980, 1990, 2000, 2010, 2020];
 
 const API_KEY = `${process.env.REACT_APP_RESAS_API_KEY}`;
 const PREFIX = "https://opendata.resas-portal.go.jp/api/v1"
@@ -23,6 +23,7 @@ const PREFIX = "https://opendata.resas-portal.go.jp/api/v1"
 export default function App() {
   const [prefs, setPrefs] = useState([]);
   const [data, setData] = useState([]);
+  const [saved, setSaved] = useState([]);
   const [checked, setChecked] = useState([]);
   
   useEffect(() => {
@@ -34,21 +35,16 @@ export default function App() {
       })
       .then(response =>{
         var fetchedPrefs = [...response.data.result];
-        var fetchedData = [];
+        // var fetchedData = [];
+        var opacities = {};
         fetchedPrefs.forEach((pref) => {
           pref["color"] = dynamicColors();
+          opacities[pref.prefName] = 1;
         });
-        years.forEach((year) => {
-          let e = {};
-          e["year"] = year;
-          fetchedPrefs.forEach((pref) => {
-            e[pref.prefName] = getRandomArbitrary(1000, 10000);
-          });
-          fetchedData.push(e);
-        });
-        setChecked(new Array(fetchedPrefs.length).fill(false))
+        setSaved(new Array(fetchedPrefs.length).fill(false));
+        setChecked(new Array(fetchedPrefs.length).fill(false));
+        setOpacity(opacities);
         setPrefs([...fetchedPrefs]);
-        setData([...fetchedData]);
       })
       .catch(e => {
         console.log(e);
@@ -59,16 +55,43 @@ export default function App() {
   }, []);
   
   const handleOnChange = (position) => {
+    var currentData = data;
+    if (!checked[position-1] && !saved[position-1]) {
+      axios.get(`${PREFIX}/population/composition/perYear?cityCode=-&prefCode=${prefs[position-1].prefCode}`, {
+        headers: {
+          "X-API-KEY": API_KEY,
+        },
+      })
+      .then(response =>{
+        var fetchedData = response.data.result.data[0].data;
+        if (currentData.length === 0) {
+          years.forEach((year) => {
+            let e = {};
+            e["year"] = year;
+            currentData.push(e);
+          });
+        }
+        fetchedData.forEach((item1) => {
+          currentData.forEach((item2) => {
+            if (item1["year"] === item2["year"]) {
+              item2[prefs[position-1].prefName] = item1["value"];
+            }
+          });
+        });
+        setData([...currentData]);
+        saved[position-1] = true;
+      })
+      .catch(e => {
+        console.log(e);
+      })
+    }
     const updatedCheckedState = checked.map((item, index) =>
       index === position - 1 ? !item : item
     );
     setChecked(updatedCheckedState);
   };
   
-  const [opacity, setOpacity] = useState({
-    'C': 1,
-    'G': 1,
-  });
+  const [opacity, setOpacity] = useState({});
 
   const handleMouseEnter = (o) => {
     const { dataKey } = o;
@@ -115,8 +138,8 @@ export default function App() {
             }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="year" />
-            <YAxis label={{ value: '人口数', offset:-12, angle: -90, position: 'insideLeft' }} />
+            <XAxis dataKey="year" label={{ value: '年度', position: 'insideBottomRight', offset: 0 }} padding={{ left: 20, right: 60 }} />
+            <YAxis label={{ value: '人口数', position: 'insideTopLeft', offset: 0 }} padding={{ top: 60, left: 10 }} />
             <Tooltip />
             <Legend onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} />
             {prefs.map(pref => checked[pref.prefCode - 1] ? (
