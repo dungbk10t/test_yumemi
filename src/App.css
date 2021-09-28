@@ -2,10 +2,32 @@
   padding: 2rem 5rem;
 }
 
+.prefs-container {
+  margin-left: 5rem;
+}
+
 .prefs-list {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
+}
+
+.pref-item {
+  font-family: none;
+  font-size: 16px;
+  width: 6rem;
+  padding: 5px;
+}
+
+input[type=checkbox] {
+  /* Double-sized Checkboxes */
+  -ms-transform: scale(1.5); /* IE */
+  -moz-transform: scale(1.5); /* FF */
+  -webkit-transform: scale(1.5); /* Safari and Chrome */
+  -o-transform: scale(1.5); /* Opera */
+  transform: scale(1.5);
+  margin-right: 0.5rem;
 }
 
 .chart-container {
